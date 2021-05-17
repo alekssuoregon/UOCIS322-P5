@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+    web:
+        build: .
+        ports:
+            - "10000:5000"
+        depends_on:
+            - brevetdb 
+        environment:
+            MONGODB_HOSTNAME: brevetdb
+    brevetdb:
+        image: mongo:latest
