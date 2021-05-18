@@ -4,7 +4,7 @@ services:
     web:
         build: .
         ports:
-            - "10000:5000"
+            - "10287:5000"
         depends_on:
             - brevetdb 
         environment:
