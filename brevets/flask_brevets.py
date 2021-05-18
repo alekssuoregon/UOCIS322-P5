@@ -8,6 +8,7 @@ import flask
 from flask import request
 import arrow  # Replacement for datetime, based on moment.js
 import acp_times  # Brevet time calculations
+import submit
 import config
 import json
 import os
@@ -37,6 +38,7 @@ def index():
 @app.route("/display")
 def display():
     app.logger.debug("Display page entry")
+    #Load the display page and fill it with info from the MongoDB database
     return flask.render_template('db.html',
                 brevets=list(db.brevets.find()))
 
@@ -78,16 +80,14 @@ def _calc_times():
 
 @app.route("/_submit")
 def _submit():
+    #Read data from MultiDict and parse string entry as JSON
     brevet_entry = json.loads(request.args.get('data', type=str))
-    for i in range(len(brevet_entry['controls'])-1, -1, -1):
-        if brevet_entry['controls'][i]['km'] == '':
-            del brevet_entry['controls'][i]
-
-    return_json = {'success': False}
-    if len(brevet_entry['controls']) != 0:
-        return_json['success'] = True
+    #Process submit request
+    response = submit.process_submit(brevet_entry)
+    if response['success'] == True:
         db.brevets.insert_one(brevet_entry)
-    return flask.jsonify(return_json)
+    #Return marshalled data
+    return flask.jsonify(response)
 
 #############
 

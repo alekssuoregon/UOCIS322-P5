@@ -112,6 +112,7 @@
             <!-- row -->
 	    <button id="submit">Submit</button>
 	    <button id="display">Display</button>
+      <h5 id="messages"></h5>
          </form>
          <script type="text/javascript">
             var SCRIPT_ROOT = {{ request.script_root|tojson|safe }} ;
@@ -143,8 +144,10 @@
                });
             }
 
+            //This aggregates all the data in the form
             function generate_controls_report() {
               var report = {brevet_dist: $('#brevet_dist_km').val(), controls: []}
+              //Iterate over everything in the control class
               $('.control').each(function(i, obj) {
                 var km = $(this).find("input[name='km']").val()
                 var open_time = $(this).find("input[name='open']").val()
@@ -183,14 +186,25 @@
                     });
                 $('#submit').click(function(event){
                   event.preventDefault()
+                  //Retrieve form data
                   report = generate_controls_report()
+                  //Send form data for database storage
                   $.getJSON(SUBMIT_URL, {data: JSON.stringify(report)}).done(
                     function(data) {
+                      //Check the status of the response and display a message
+                      if (data['success'] == false) {
+                        $('#messages').text("Error: " + data['error'])
+                        $('#messages').css('color', 'red')
+                      } else {
+                        $('#messages').text("Submission success!")
+                        $('#messages').css('color', 'green')
+                      }
                       console.log(data)
                     });
                 });
                 $('#display').click(function(event){
                   event.preventDefault()
+                  //Open a new tab with a to the '/display' route
                   window.open('/display', '_blank')
                 });
                });
